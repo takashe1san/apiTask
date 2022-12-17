@@ -13,17 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('advertisements', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->string('address')->nullable();
-            $table->string('city');
-            $table->set('type',['admin', 'user']);
+            $table->string('description');
             $table->timestamps();
+            $table->integer('category');
+            $table->integer('user');
+            $table->foreign('category')->references('id')->on('categories')->onDelete('cascade');
+            $table->foreign('user')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -34,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('advertisements');
     }
 };
