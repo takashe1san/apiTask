@@ -18,7 +18,7 @@ return new class extends Migration
             $table->set('status',['pending', 'rejected', 'allowed']);
             $table->string('reject_reason')->nullable();
             $table->timestamps();
-            $table->integer('advertisement');
+            $table->bigInteger('advertisement')->unsigned();
             $table->foreign('advertisement')->references('id')->on('advertisements')->onDelete('cascade');
         });
     }

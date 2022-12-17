@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('description');
             $table->timestamps();
-            $table->integer('category');
-            $table->integer('user');
+            $table->bigInteger('category')->unsigned();
+            $table->bigInteger('user')->unsigned();
             $table->foreign('category')->references('id')->on('categories')->onDelete('cascade');
             $table->foreign('user')->references('id')->on('users')->onDelete('cascade');
         });
