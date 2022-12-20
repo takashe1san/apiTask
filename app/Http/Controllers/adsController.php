@@ -12,19 +12,25 @@ class adsController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware('auth:api');
+        $this->middleware('auth:api');
     }
 
     public function insertAds(Request $request){
 
+        $this->authorize('create', advertisement::class);
+        
         $request->validate([
             'name' => 'required|string',
             'description' => 'nullable|string',
             'category' => 'required|exists:categories,id',
-            'user'  => 'required|exists:users,id',
         ]);
 
-        $ads = advertisement::create($request->toArray());
-        return response()->json(['msg' => 'advertisement inserted successfully!', 'ads' => $ads]);
+        $ads = $request->toArray();
+        $ads['user'] = auth()->user()->id;
+
+        if(advertisement::create($ads))
+            return response()->json(['msg' => 'advertisement inserted successfully!', 'ads' => $ads]);
+        else
+            return response()->json(['error' => 'Something went wronge!!!']);
     }
 }
