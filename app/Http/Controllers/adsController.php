@@ -21,7 +21,7 @@ class adsController extends Controller
 
         $request->validate([
             'name'        => 'required|string',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'category'    => 'required|exists:categories,id',
         ]);
 
@@ -61,7 +61,7 @@ class adsController extends Controller
 
         $request->validate([
             'name'        => 'required|string',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'category'    => 'required|exists:categories,id',
         ]);
 
