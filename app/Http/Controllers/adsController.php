@@ -30,11 +30,24 @@ class adsController extends Controller
 
         if($Ads = advertisement::create($ads)){
             if((new OrdersController)->createOrder($Ads)){
-                return response()->json(['msg' => 'advertisement inserted successfully!', 'ads' => $ads]);
-            }else{
+
+                for($i=0; $i<5; $i++)
+                {
+                    (new ImagesController)->insert($Ads, $image[] = '/'. $request->imgs[$i]->store('storage'));
+                }
+
+                return response()->json([
+                    'msg'    => 'advertisement inserted successfully!',
+                    'ads'    => $Ads,
+                    'images' => $image,
+                ]);
+
+            }else
+            {
                 return response()->json(['error' => 'Something went wronge!!']);
             }
-        }else{
+        }else
+        {
             return response()->json(['error' => 'advertisement doesn\'t created!!!']);
         }
 
