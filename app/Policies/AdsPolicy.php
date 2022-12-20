@@ -66,7 +66,7 @@ class AdsPolicy
      */
     public function delete(User $user, advertisement $advertisement)
     {
-        return $user->id == $advertisement->user;
+        return ($user->id == $advertisement->user || $user->type == 'admin');
     }
 
 }

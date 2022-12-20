@@ -31,6 +31,8 @@ Route::group([
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('signup', [AuthController::class, 'signup']);
 
-    Route::post('insertAds', [adsController::class, 'insertAds']);
+    Route::post('insertAds', [adsController::class, 'insert']);
+    Route::post('updateAds', [adsController::class, 'update']);
+    Route::get('deleteAds', [adsController::class, 'delete']);
 
 });
