@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->set('status',['pending', 'rejected', 'allowed']);
+            $table->set('status',['pending', 'rejected', 'allowed'])->default('pending');
             $table->string('reject_reason')->nullable();
             $table->timestamps();
             $table->bigInteger('advertisement')->unsigned();

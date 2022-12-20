@@ -18,7 +18,7 @@ class adsController extends Controller
     public function insertAds(Request $request){
 
         $this->authorize('create', advertisement::class);
-        
+
         $request->validate([
             'name' => 'required|string',
             'description' => 'nullable|string',
@@ -28,9 +28,15 @@ class adsController extends Controller
         $ads = $request->toArray();
         $ads['user'] = auth()->user()->id;
 
-        if(advertisement::create($ads))
-            return response()->json(['msg' => 'advertisement inserted successfully!', 'ads' => $ads]);
-        else
+        if($Ads = advertisement::create($ads)){
+            if((new OrdersController)->createOrder($Ads)){
+                return response()->json(['msg' => 'advertisement inserted successfully!', 'ads' => $ads]);
+            }else{
+                return response()->json(['error' => 'Something went wronge!!']);
+            }
+        }else{
             return response()->json(['error' => 'Something went wronge!!!']);
+        }
+
     }
 }
