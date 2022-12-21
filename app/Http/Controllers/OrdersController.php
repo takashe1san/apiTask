@@ -15,7 +15,8 @@ class OrdersController extends Controller
 
     public function createOrder(advertisement $Ads)
     {
-        return Order::create(['advertisement' => $Ads->id]);
+        $order = Order::create(['advertisement' => $Ads->id]);
+        return $order->id;
     }
 
     public function changeStatus(Request $request){

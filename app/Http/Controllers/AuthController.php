@@ -20,7 +20,6 @@ class AuthController extends Controller
             'password' => 'required',
             'address'  => 'nullable',
             'city'     => 'required',
-            'type'     => 'in:admin,user'
         ];
 
         $request->validate($roles);
@@ -31,7 +30,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'address'  => $request->address,
             'city'     => $request->city,
-            'type'     => $request->type,
+            'type'     => 'user',
         ])){
             return response()->json(['msg' => 'Account created!!']);
         }else{

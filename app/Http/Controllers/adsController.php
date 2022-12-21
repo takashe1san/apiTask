@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\advertisement;
-use App\Models\Category;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class adsController extends Controller
 {
@@ -29,23 +26,29 @@ class adsController extends Controller
         $ads['user'] = auth()->user()->id;
 
         if($Ads = advertisement::create($ads)){
-            if((new OrdersController)->createOrder($Ads)){
 
-                for($i=0; $i<5; $i++)
+            $orderID = (new OrdersController)->createOrder($Ads);
+
+            if($i = $request->hasFile('imgs')){
+                $c = 0;
+                foreach($request->imgs as $img)
                 {
-                    (new ImagesController)->insert($Ads, $image[] = '/'. $request->imgs[$i]->store('storage'));
+                    (new ImagesController)->insert($Ads, $image[] = '/'. $img->store('storage'));
+                    if($c == 4) break;
+                    $c++;
                 }
-
-                return response()->json([
-                    'msg'    => 'advertisement inserted successfully!',
-                    'ads'    => $Ads,
-                    'images' => $image,
-                ]);
-
-            }else
-            {
-                return response()->json(['error' => 'Something went wronge!!']);
             }
+
+            NotificationsController::adminNotify($orderID);
+
+            return response()->json([
+                'msg'    => 'advertisement inserted successfully!',
+                'ads'    => $Ads,
+                'images' => $i? $image: null,
+            ]);
+
+            return response()->json(['error' => 'Something went wronge!!']);
+
         }else
         {
             return response()->json(['error' => 'advertisement doesn\'t created!!!']);
@@ -88,4 +91,5 @@ class adsController extends Controller
             return response()->json(['error' => 'Something went wronge!!']);
         }
     }
+
 }
