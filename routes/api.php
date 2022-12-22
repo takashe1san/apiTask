@@ -3,7 +3,9 @@
 use App\Http\Controllers\adsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\VerificationController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,6 +33,17 @@ Route::group([
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('signup', [AuthController::class, 'signup']);
+
+    // Verify email
+    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, '__invoke'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
+
+    // Resend link to verify email
+    Route::post('/email/verify/resend', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('message', 'Verification link sent!');
+    })->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
 
     Route::post('insertAds', [adsController::class, 'insert']);
     Route::post('updateAds', [adsController::class, 'update']);

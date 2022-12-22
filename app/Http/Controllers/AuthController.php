@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -24,7 +25,7 @@ class AuthController extends Controller
 
         $request->validate($roles);
 
-        if(User::create([
+        if($user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
@@ -32,7 +33,11 @@ class AuthController extends Controller
             'city'     => $request->city,
             'type'     => 'user',
         ])){
+
+            event(new Registered($user));
+
             return response()->json(['msg' => 'Account created!!']);
+            
         }else{
             return response()->json(['msg' => 'Something went wrong!!!']);
         }
