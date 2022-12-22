@@ -35,6 +35,15 @@ class OrdersController extends Controller
         $order->reject_reason = $request->status == 'rejected'? $request->reject_reason: null;
 
         if($order->save()){
+
+            $ord = [
+                'Ads'    => $order->advertisement,
+                'Status' => $order->status,
+            ];
+            if($order->status == 'rejected') $ord['reject_reason'] = $order->reject_reason;
+
+            NotificationsController::userNotify($ord);
+            
             return response()->json(['msg' => 'successfully updated!', 'order' => $order]);
         }else{
             return response()->json(['error' => 'Something went wronge!!']);

@@ -16,4 +16,7 @@ class advertisement extends Model
         'user',
     ];
     
+    public function users(){
+        return $this->belongsTo(User::class, 'user');
+    }
 }
