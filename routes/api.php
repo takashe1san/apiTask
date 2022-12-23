@@ -40,10 +40,9 @@ Route::group([
     ->name('verification.verify');
 
     // Resend link to verify email
-    Route::post('/email/verify/resend', function (Request $request) {
-    $request->user()->sendEmailVerificationNotification();
-    return back()->with('message', 'Verification link sent!');
-    })->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
+    Route::post('/email/verify/resend', [VerificationController::class, 'resendVerification'])
+    ->middleware(['auth:api', 'throttle:6,1'])
+    ->name('verification.send');
 
     Route::post('insertAds', [adsController::class, 'insert']);
     Route::post('updateAds', [adsController::class, 'update']);

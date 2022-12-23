@@ -9,18 +9,31 @@ use Illuminate\Http\Request;
 
 class VerificationController extends Controller
 {
-    public function __invoke(Request $request): RedirectResponse
+    public function __invoke(Request $request)
     {
         $user = User::find($request->route('id'));
 
         if ($user->hasVerifiedEmail()) {
-            return redirect(env('FRONT_URL') . '/email/verify/already-success');
+            return 'Your email already verified ^_^';
         }
 
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
         }
 
-        return redirect(env('FRONT_URL') . '/email/verify/success');
+        return 'Email verified successfully :)';
+    }
+
+    public function resendVerification(){
+
+        $user = auth()->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['msg' => 'Your email already verified ^_^']);
+        }
+
+        $user->sendEmailVerificationNotification();
+        
+        return response()->json(['msg' => 'Verification link sent!']);
     }
 }
