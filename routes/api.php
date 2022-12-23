@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\adsController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Http\Request;
@@ -30,24 +31,30 @@ Route::group([
 
 ], function ($router) {
 
-    Route::post('login', [AuthController::class, 'login']);
+    // Authentication
+    Route::post('login',  [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('signup', [AuthController::class, 'signup']);
 
     // Verify email
     Route::get('/email/verify/{id}/{hash}', [VerificationController::class, '__invoke'])
-    ->middleware(['signed', 'throttle:6,1'])
-    ->name('verification.verify');
+        ->middleware(['signed', 'throttle:6,1']);
 
     // Resend link to verify email
     Route::post('/email/verify/resend', [VerificationController::class, 'resendVerification'])
-    ->middleware(['auth:api', 'throttle:6,1'])
-    ->name('verification.send');
+        ->middleware(['auth:api', 'throttle:6,1']);
 
-    Route::post('insertAds', [adsController::class, 'insert']);
-    Route::post('updateAds', [adsController::class, 'update']);
-    Route::get('deleteAds', [adsController::class, 'delete']);
+    // Advertisements
+    Route::post('ads/insert', [adsController::class, 'insert']);
+    Route::post('ads/update', [adsController::class, 'update']);
+    Route::get('ads/delete',  [adsController::class, 'delete']);
 
-    Route::post('changeOrderStatus', [OrdersController::class, 'changeStatus']);
+    // Orders
+    Route::post('order/changeStatus', [OrdersController::class, 'changeStatus']);
+
+    // Categories
+    Route::post('category/create', [CategoriesController::class, 'store']);
+    Route::post('category/update', [CategoriesController::class, 'update']);
+    Route::get('category/delete',  [CategoriesController::class, 'destroy']);
 
 });

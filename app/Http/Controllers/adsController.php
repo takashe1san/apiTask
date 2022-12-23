@@ -33,7 +33,7 @@ class adsController extends Controller
                 $c = 0;
                 foreach($request->imgs as $img)
                 {
-                    (new ImagesController)->insert($Ads, $image[] = '/'. $img->store('storage'));
+                    (new ImagesController)->insert($Ads, $image[] = $img->store('storage'));
                     if($c == 4) break;
                     $c++;
                 }
@@ -46,8 +46,6 @@ class adsController extends Controller
                 'ads'    => $Ads,
                 'images' => $i? $image: null,
             ]);
-
-            return response()->json(['error' => 'Something went wronge!!']);
 
         }else
         {
