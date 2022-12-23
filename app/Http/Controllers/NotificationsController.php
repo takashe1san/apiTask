@@ -18,7 +18,8 @@ class NotificationsController extends Controller
         $admin = User::where('type', 'admin')->get();
         Notification::send($admin, new newAds($orderID));
         
-        event(new AdsInserted($orderID));
+        if(env('PUSHER_ENABLE'))
+            event(new AdsInserted($orderID));
 
     }
 
@@ -27,7 +28,8 @@ class NotificationsController extends Controller
         $user = advertisement::find($order['Ads'])->users;
         Notification::send($user, new AdsGotReview($order));
 
-        event(new OrderStatusChanged($order));
+        if(env('PUSHER_ENABLE'))
+            event(new OrderStatusChanged($order));
         
     }
 }

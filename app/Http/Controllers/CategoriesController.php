@@ -15,11 +15,13 @@ class CategoriesController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $categories = Category::forPage($request->page, 5)->get();
+        return response()->json($categories);
     }
 
     /**
@@ -62,7 +64,8 @@ class CategoriesController extends Controller
      */
     public function show($id)
     {
-        //
+        $category = Category::find($id);
+        return response()->json($category);
     }
 
     /**

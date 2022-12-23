@@ -13,14 +13,26 @@ class OrdersController extends Controller
         $this->middleware(['auth:api','verified']);
     }
 
+    public function index(Request $request)
+    {
+        $orders = Order::forPage($request->page, 3)->get();
+        return response()->json($orders);
+    }
+
+    public function show($id)
+    {
+        $order = Order::find($id);
+        return response()->json($order);
+    }
+
     public function createOrder(advertisement $Ads)
     {
         $order = Order::create(['advertisement' => $Ads->id]);
         return $order->id;
     }
 
-    public function changeStatus(Request $request){
-
+    public function changeStatus(Request $request)
+    {
         $order = Order::find($request->order);
         
         $this->authorize('modify', Order::class);

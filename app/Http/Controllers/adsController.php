@@ -12,8 +12,20 @@ class adsController extends Controller
         $this->middleware(['auth:api','verified']);
     }
 
-    public function insert(Request $request){
+    public function index(Request $request)
+    {
+        $Ads = advertisement::forPage($request->page, 5)->get();
+        return response()->json($Ads);
+    }
 
+    public function show($id)
+    {
+        $ads = advertisement::find($id);
+        return response()->json($ads);
+    }
+
+    public function insert(Request $request)
+    {
         $this->authorize('create', advertisement::class);
 
         $request->validate([
@@ -39,7 +51,7 @@ class adsController extends Controller
                 }
             }
 
-            //NotificationsController::adminNotify($orderID);
+            NotificationsController::adminNotify($orderID);
 
             return response()->json([
                 'msg'    => 'advertisement inserted successfully!',
@@ -54,8 +66,8 @@ class adsController extends Controller
 
     }
 
-    public function delete(Request $request){
-
+    public function delete(Request $request)
+    {
         $ads = advertisement::find($request->AdsID);
 
         $this->authorize('delete', $ads, advertisement::class);
@@ -69,8 +81,8 @@ class adsController extends Controller
         }
     }
 
-    public function update(Request $request){
-
+    public function update(Request $request)
+    {
         $ads = advertisement::find($request->AdsID);
 
         $this->authorize('update', $ads, advertisement::class);
