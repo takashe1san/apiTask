@@ -33,13 +33,13 @@ class adsController extends Controller
                 $c = 0;
                 foreach($request->imgs as $img)
                 {
-                    (new ImagesController)->insert($Ads, $image[] = $img->store('storage'));
+                    ImagesController::insert($Ads, $image[] = $img->store('storage'));
                     if($c == 4) break;
                     $c++;
                 }
             }
 
-            NotificationsController::adminNotify($orderID);
+            //NotificationsController::adminNotify($orderID);
 
             return response()->json([
                 'msg'    => 'advertisement inserted successfully!',
@@ -59,6 +59,8 @@ class adsController extends Controller
         $ads = advertisement::find($request->AdsID);
 
         $this->authorize('delete', $ads, advertisement::class);
+
+        ImagesController::delete($ads->id);
 
         if($ads->delete()){
             return response()->json(['msg' => 'successfully deleted!']);
