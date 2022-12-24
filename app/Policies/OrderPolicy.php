@@ -28,9 +28,9 @@ class OrderPolicy
      * @param  \App\Models\Order  $order
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, Order $order)
+    public function view(User $user)
     {
-        //
+        return $user->type == 'admin';
     }
 
     /**

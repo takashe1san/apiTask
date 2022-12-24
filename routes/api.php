@@ -40,16 +40,18 @@ Route::group([
     // users
     Route::get('users',        [UsersController::class, 'index'   ]);
     Route::get('user/{id}',    [UsersController::class, 'show'    ]);
-    Route::get('user/me',      [UsersController::class, 'personal'])->middleware(['auth:api']);
-    Route::post('user/update', [UsersController::class, 'update'  ])->middleware(['auth:api']);
+    Route::get('me',      [UsersController::class, 'personal'])->middleware(['auth:api']);
+    Route::post('me/update', [UsersController::class, 'update'  ])->middleware(['auth:api']);
 
     // Verify email
     Route::get('/email/verify/{id}/{hash}', [VerificationController::class, '__invoke'])
-        ->middleware(['signed', 'throttle:6,1']);
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
 
     // Resend link to verify email
     Route::post('/email/verify/resend', [VerificationController::class, 'resendVerification'])
-        ->middleware(['auth:api', 'throttle:6,1']);
+        ->middleware(['auth:api', 'throttle:6,1'])
+        ->name('verification.send');
 
     // Advertisements
     Route::post('ads/insert', [adsController::class, 'insert']);

@@ -15,12 +15,16 @@ class OrdersController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('view', Order::class);
+
         $orders = Order::forPage($request->page, 3)->get();
         return response()->json($orders);
     }
 
     public function show($id)
     {
+        $this->authorize('view', Order::class);
+        
         $order = Order::find($id);
         return response()->json($order);
     }
