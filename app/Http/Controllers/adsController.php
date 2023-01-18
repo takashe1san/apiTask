@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AddAdvertisementRequest;
+use App\Http\Requests\EditAdvertisementRequest;
 use App\Models\advertisement;
 use Illuminate\Http\Request;
 
@@ -9,98 +11,84 @@ class adsController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth:api','verified'], ['except' => ['index', 'show']]);
+        $this->middleware(['auth:api','verified'], ['except' => ['getAll', 'get']]);
     }
 
-    public function index(Request $request)
+    public function getAll(Request $request)
     {
-        $Ads = advertisement::forPage($request->page, 5)->get();
-        return response()->json($Ads);
+        $Ads = advertisement::forPage($request->page, 5)->with('images')->get();
+        return apiResponse(1, $Ads);
     }
 
-    public function show($id)
+    public function get($id)
     {
-        $ads = advertisement::find($id);
-        return response()->json($ads);
+        if($ads = advertisement::where('id', $id)->with('images')->first())
+            return apiResponse(1, $ads);
+        else
+            return apiResponse(0, 'Advertisement is not exists');
     }
 
-    public function insert(Request $request)
+    public function add(AddAdvertisementRequest $request)
     {
         $this->authorize('create', advertisement::class);
 
-        $request->validate([
-            'name'        => 'required|string',
-            'description' => 'required|string',
-            'category'    => 'required|exists:categories,id',
-        ]);
+        $Ads = new advertisement($request->toArray());
+        $Ads->user = auth()->user()->id;
 
-        $ads = $request->toArray();
-        $ads['user'] = auth()->user()->id;
+        if($Ads->save()){
 
-        if($Ads = advertisement::create($ads)){
+            $orderID = OrdersController::add($Ads);
 
-            $orderID = (new OrdersController)->createOrder($Ads);
-
-            if($i = $request->hasFile('imgs')){
-                $c = 0;
-                foreach($request->imgs as $img)
-                {
-                    ImagesController::insert($Ads, $image[] = $img->store('storage'));
-                    if($c == 4) break;
-                    $c++;
-                }
+            if($haveImage = $request->hasFile('images'))
+            {
+                $images = ImagesController::add($Ads->id, $request->images);        
             }
 
             NotificationsController::adminNotify($orderID);
 
-            return response()->json([
-                'msg'    => 'advertisement inserted successfully!',
+            return apiResponse(1, [
                 'ads'    => $Ads,
-                'images' => $i? $image: null,
+                'images' => $haveImage? $images: null,
             ]);
 
         }else
         {
-            return response()->json(['error' => 'advertisement doesn\'t created!!!']);
+            return apiResponse(0, 'advertisement doesn\'t created!!!');
         }
 
     }
 
-    public function delete(Request $request)
+    public function delete($id)
     {
-        $ads = advertisement::find($request->AdsID);
+        if(!$ads = advertisement::find($id))
+            return apiResponse(0, 'advertisement is not exists!!');
 
         $this->authorize('delete', $ads, advertisement::class);
 
         ImagesController::delete($ads->id);
 
         if($ads->delete()){
-            return response()->json(['msg' => 'successfully deleted!']);
+            return apiResponse(1, 'advertisement deleted');
         }else{
-            return response()->json(['error' => 'Something went wronge!!']);
+            return apiResponse(0, 'advertisement doesn\'t deleted!!!'); 
         }
     }
 
-    public function update(Request $request)
+    public function edit(EditAdvertisementRequest $request)
     {
-        $ads = advertisement::find($request->AdsID);
+        if(!$ads = advertisement::find($request->AdsID))
+            return apiResponse(0, 'advertisement is not exists!!');
 
         $this->authorize('update', $ads, advertisement::class);
-
-        $request->validate([
-            'name'        => 'required|string',
-            'description' => 'required|string',
-            'category'    => 'required|exists:categories,id',
-        ]);
 
         $ads->name        = $request->name;
         $ads->description = $request->description;
         $ads->category    = $request->category;
 
         if($ads->save()){
-            return response()->json(['msg' => 'successfully updated!', 'ads' => $ads]);
+            return apiResponse(1, $ads);
         }else{
-            return response()->json(['error' => 'Something went wronge!!']);
+            return apiResponse(0, 'Advertisement editing failed!!');
         }
     }
 

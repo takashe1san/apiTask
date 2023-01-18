@@ -16,7 +16,13 @@ class advertisement extends Model
         'user',
     ];
     
-    public function users(){
+    public function users()
+    {
         return $this->belongsTo(User::class, 'user');
+    }
+    
+    public function images()
+    {
+        return $this->hasMany(Image::class, 'advertisement');
     }
 }

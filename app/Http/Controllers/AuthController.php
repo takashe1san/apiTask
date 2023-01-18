@@ -15,7 +15,7 @@ class AuthController extends Controller
     }
 
     public function signup(Request $request){
-        $roles = [
+        $rules = [
             'name'     => 'required',
             'email'    => ['email', 'required', 'unique:users'],
             'password' => 'required',
@@ -23,43 +23,48 @@ class AuthController extends Controller
             'city'     => 'required',
         ];
 
-        $request->validate($roles);
+        $request->validate($rules);
 
-        if($user = User::create([
+        $user = new User([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'address'  => $request->address,
             'city'     => $request->city,
             'type'     => 'user',
-        ])){
+        ]);
 
-            event(new Registered($user));
+        if($user->save()){
 
-            return response()->json(['msg' => 'Account created!!']);
-            
+            VerificationController::sendVerification($user);
+
+            return apiResponse(1, $user);
         }else{
-            return response()->json(['msg' => 'Something went wrong!!!']);
+            return apiResponse(0,'Account doesn\'t created!!');
         }
     }
 
-    public function login(Request $request){
-        $credentials = $request->only(['email', 'password']);
-        if(!$token = auth()->attempt($credentials)){
-            return response()->json(['error' => 'Unauthorized'], 401);
+    public function login(Request $request)
+    {
+        if(!$token = auth()->attempt($request->only(['email', 'password']))){
+            return response()->json([
+                'seccess' => false,
+                'message' => 'Unauthorized'
+            ], 401);
         }
         return $this->respondWithToken($token);
     }
 
     public function logout(){
-        auth()->logout();
+        if(auth()->logout())
+            apiResponse(1, 'logged out');
     }
 
     protected function respondWithToken($token){
-        return response()->json([
-            'access_token' => $token,
-            'token_type'   => 'beared',
-            'expires_in'   => env('JWT_TTL', 60)*60
+        return apiResponse(1, [
+                'access_token' => $token,
+                'token_type'   => 'beared',
+                'expires_in'   => env('JWT_TTL', 60)*60
         ]);
     }
 }

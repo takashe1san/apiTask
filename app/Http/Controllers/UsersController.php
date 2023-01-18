@@ -7,26 +7,28 @@ use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
-    public function index(Request $request)
+    public function getAll(Request $request)
     {
         $users = User::select(['id', 'name', 'email', 'city', 'type'])->forPage($request->page, 5)->get();
-        return response()->json($users);
+        return apiResponse(1, $users);
     }
 
-    public function show($id)
+    public function get($id)
     {
-        $user = User::select(['id', 'name', 'email', 'city', 'type'])->find($id);
-        return response()->json($user);
+        if($user = User::select(['id', 'name', 'email', 'city', 'type'])->find($id))
+            return apiResponse(1, $user);
+        else
+            return apiResponse(0, 'Can\'t find this user!!');
 
     }
 
     public function personal()
     {
         $user = auth()->user();
-        return response()->json($user);
+        return apiResponse(1, $user);
     }
 
-    public function update(Request $request)
+    public function edit(Request $request)
     {
         $user = User::find(auth()->user()->id);
 
@@ -35,11 +37,8 @@ class UsersController extends Controller
         $user->city    = $request->has('city')   ? $request->city   : $user->city;
 
         if($user->save())
-            return response()->json([
-                'msg'  => 'Information updated successfully ^_^ ',
-                'info' => $user,
-            ]);
-        
-        return response()->json(['error' => 'Something went wronge :(']);
+            return apiResponse(1, $user);
+        else
+            return apiResponse(0, 'Your info editing failed');
     }
 }

@@ -8,12 +8,21 @@ use Illuminate\Http\Request;
 
 class ImagesController extends Controller
 {
-    public static function insert(advertisement $Ads, $path)
+    public static function add($AdsID, $images)
     {
-        Image::create([
-            'path'          => $path,
-            'advertisement' => $Ads->id,
-        ]);
+        $paths = [];
+        foreach($images as $image)
+        {
+            $path = $image->store('storage');
+
+            Image::create([
+                'path'         => $path,
+                'advertisement' => $AdsID,
+            ]);
+
+            $paths[] = $path;
+        }
+        return $paths;
     }
 
     public static function delete($Ads)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EditOrderRequest;
 use App\Models\advertisement;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -13,39 +14,36 @@ class OrdersController extends Controller
         $this->middleware(['auth:api','verified']);
     }
 
-    public function index(Request $request)
+    public function getAll(Request $request)
     {
         $this->authorize('view', Order::class);
 
         $orders = Order::forPage($request->page, 3)->get();
-        return response()->json($orders);
+        return apiResponse(1, $orders);
     }
 
-    public function show($id)
+    public function get($id)
     {
         $this->authorize('view', Order::class);
         
-        $order = Order::find($id);
-        return response()->json($order);
+        if($order = Order::find($id))
+            return apiResponse(1, $order);
+        else
+            return apiResponse(0, 'Can\'t find this Order!');
     }
 
-    public function createOrder(advertisement $Ads)
+    public static function add(advertisement $Ads)
     {
-        $order = Order::create(['advertisement' => $Ads->id]);
-        return $order->id;
+        $order = new Order(['advertisement' => $Ads->id]);
+        if($order->save())
+            return $order->id;
     }
 
-    public function changeStatus(Request $request)
+    public function edit(EditOrderRequest $request)
     {
         $order = Order::find($request->order);
         
         $this->authorize('modify', Order::class);
-
-        $rejectReason = $request->status == 'rejected'? 'required': 'nullable';
-        $request->validate([
-            'status' => 'required|in:pending,rejected,allowed',
-            'reject_reason' => $rejectReason,
-        ]);
         
         $order->status = $request->status;
         $order->reject_reason = $request->status == 'rejected'? $request->reject_reason: null;
@@ -60,9 +58,9 @@ class OrdersController extends Controller
 
             NotificationsController::userNotify($ord);
             
-            return response()->json(['msg' => 'successfully updated!', 'order' => $order]);
+            return apiResponse(1, $order);
         }else{
-            return response()->json(['error' => 'Something went wronge!!']);
+            return apiResponse(0, 'Order editing failed!!');
         }
     }
 }

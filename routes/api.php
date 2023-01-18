@@ -38,38 +38,32 @@ Route::group([
     Route::post('signup', [AuthController::class, 'signup']);
 
     // users
-    Route::get('users',        [UsersController::class, 'index'   ]);
-    Route::get('user/{id}',    [UsersController::class, 'show'    ]);
-    Route::get('me',      [UsersController::class, 'personal'])->middleware(['auth:api']);
-    Route::post('me/update', [UsersController::class, 'update'  ])->middleware(['auth:api']);
+    Route::get('users',     [UsersController::class, 'getAll'  ]);
+    Route::get('user/{id}', [UsersController::class, 'get'     ]);
+    Route::get('me',        [UsersController::class, 'personal'])->middleware(['auth:api']);
+    Route::post('me/edit',  [UsersController::class, 'edit'    ])->middleware(['auth:api']);
 
-    // Verify email
-    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, '__invoke'])
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
-
-    // Resend link to verify email
-    Route::post('/email/verify/resend', [VerificationController::class, 'resendVerification'])
-        ->middleware(['auth:api', 'throttle:6,1'])
-        ->name('verification.send');
+    // Email verification
+    Route::get('/email/verify/{id}/{token}', [VerificationController::class, 'verify']);
+    Route::post('/email/verify/resend',      [VerificationController::class, 'resendVerification']);
 
     // Advertisements
-    Route::post('ads/insert', [adsController::class, 'insert']);
-    Route::post('ads/update', [adsController::class, 'update']);
-    Route::get('ads/delete',  [adsController::class, 'delete']);
-    Route::get('ads',         [adsController::class, 'index' ]);
-    Route::get('ads/{id}',    [adsController::class, 'show'  ]);
+    Route::post('ads/add',       [adsController::class, 'add'   ]);
+    Route::post('ads/edit',      [adsController::class, 'edit'  ]);
+    Route::get('ads/delete/{id}',[adsController::class, 'delete']);
+    Route::get('ads',            [adsController::class, 'getAll']);
+    Route::get('ads/{id}',       [adsController::class, 'get'   ]);
 
     // Orders
-    Route::post('order/changeStatus', [OrdersController::class, 'changeStatus']);
-    Route::get('order',               [OrdersController::class, 'index'       ]);
-    Route::get('order/{id}',          [OrdersController::class, 'show'        ]);
+    Route::post('order/edit', [OrdersController::class, 'edit'  ]);
+    Route::get('order',       [OrdersController::class, 'getAll']);
+    Route::get('order/{id}',  [OrdersController::class, 'get'   ]);
 
     // Categories
-    Route::post('category/create', [CategoriesController::class, 'store'  ]);
-    Route::post('category/update', [CategoriesController::class, 'update' ]);
-    Route::get('category/delete',  [CategoriesController::class, 'destroy']);
-    Route::get('category',         [CategoriesController::class, 'index'  ]);
-    Route::get('category/{id}',    [CategoriesController::class, 'show'   ]);
+    Route::post('category/add',       [CategoriesController::class, 'add'   ]);
+    Route::post('category/edit',      [CategoriesController::class, 'edit'  ]);
+    Route::get('category/delete/{id}',[CategoriesController::class, 'delete']);
+    Route::get('category',            [CategoriesController::class, 'getAll']);
+    Route::get('category/{id}',       [CategoriesController::class, 'get'   ]);
 
 });

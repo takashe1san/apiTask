@@ -1,0 +1,11 @@
+
+# Categories ----------------------
+# Get all Categories
+get http://127.0.0.1:8000/api/category
+Content-Type: application/json
+
+{
+    "page" : 2
+}
+
+###

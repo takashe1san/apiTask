@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AddCategoryRequest;
+use App\Http\Requests\EditCategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -9,7 +11,7 @@ class CategoriesController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth:api','verified'], ['except' => ['index', 'show']]);
+        $this->middleware(['auth:api','verified'], ['except' => ['getAll', 'get']]);
     }
 
     /**
@@ -18,10 +20,10 @@ class CategoriesController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function getAll(Request $request)
     {
         $categories = Category::forPage($request->page, 5)->get();
-        return response()->json($categories);
+        return apiResponse(1, $categories);
     }
 
     /**
@@ -30,29 +32,20 @@ class CategoriesController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function add(AddCategoryRequest $request)
     {
         $this->authorize('create', Category::class);
 
-        $request->validate([
-            'name'        => 'string|required|unique:categories,name',
-            'description' => 'string|nullable',
-            'image'       => 'image|required',
-        ]);
-
-        $temp = [
+        $category = new Category([
             'name'        => $request->name,
             'description' => $request->description,
             'image'       => $request->image->store('storage'),
-        ];
+        ]);
 
-        if($category = Category::create($temp))
-            return response()->json([
-                'msg'      => 'Category created successfully',
-                'category' => $category,
-            ]);
-        
-        return response()->json(['msg' => 'Something went wronge!!!']);
+        if($category->save())
+            return apiResponse(1, $category);
+        else
+            return apiResponse(0, 'Category doesn\'t created!!!');
 
     }
 
@@ -62,10 +55,13 @@ class CategoriesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function get($id)
     {
-        $category = Category::find($id);
-        return response()->json($category);
+        if( $category = Category::find($id))
+            return apiResponse(1, $category);
+        else
+            return apiResponse(0, 'Category is not exists!!');
+
     }
 
     /**
@@ -75,16 +71,11 @@ class CategoriesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function edit(EditCategoryRequest $request)
     {
         if($category = Category::find($request->id)){
 
             $this->authorize('update', Category::class);
-
-            $request->validate([
-                'description' => 'string|nullable',
-                'image'       => 'image|nullable',
-            ]);
 
             $category->description = $request->has('description')? $request->description: null;
 
@@ -94,14 +85,13 @@ class CategoriesController extends Controller
             }
 
             if($category->save())
-                return response()->json([
-                    'msg'      => 'Category updated successfully :) ',
-                    'category' => $category,
-                ]);
+                return apiResponse(1, $category);
+            else
+                return apiResponse(0, 'Category editing failed!!');
 
         }
 
-        return response()->json(['error' => 'Category doesn\'t exist!!']);
+        return apiResponse(0, 'Category doesn\'t exist!!');
 
     }
 
@@ -111,18 +101,19 @@ class CategoriesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request)
+    public function delete($id)
     {
-        if($category = Category::find($request->id))
+        if($category = Category::find($id))
         {
             $this->authorize('delete', Category::class);
 
             unlink($category->image);
-            $category->delete();
-
-            return response()->json(['msg' => 'Category deleted successfully']);
+            if($category->delete())
+                return apiResponse(1, 'Category deleted successfully');
+            else
+                return apiResponse(0, 'Category deleting failed!!!');
         }
 
-        return response()->json(['error' => 'Category doesn\'t exist!!']);
+        return apiResponse(0, 'Category doesn\'t exist!!');
     }
 }
