@@ -11,7 +11,7 @@ class adsController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth:api','verified'], ['except' => ['getAll', 'get']]);
+        // $this->middleware(['auth:api','verified'], ['except' => ['getAll', 'get']]);
     }
 
     public function getAll(Request $request)
@@ -76,7 +76,7 @@ class adsController extends Controller
 
     public function edit(EditAdvertisementRequest $request)
     {
-        if(!$ads = advertisement::find($request->AdsID))
+        if(!$ads = advertisement::with('images')->find($request->AdsID))
             return apiResponse(0, 'advertisement is not exists!!');
 
         $this->authorize('update', $ads, advertisement::class);
@@ -85,6 +85,16 @@ class adsController extends Controller
         $ads->description = $request->description;
         $ads->category    = $request->category;
 
+        for ($i=0; $i < 5; $i++) { 
+            if($request->hasFile('image'.$i)){
+                $status = ImagesController::edit($ads->id, $ads->images[$i]->id, $request->file('image'.$i));
+                if($status['success']){
+                    $ads->images[$i]->path = $status['newPath'];
+                }else{
+                    return apiResponse(0, $status['message']);
+                }
+            }
+        }
         if($ads->save()){
             return apiResponse(1, $ads);
         }else{

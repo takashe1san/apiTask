@@ -18,4 +18,15 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_add_ads()
+    {
+        $response = $this->post('api/ads/add', [
+            'name' => 'Ads from test',
+            'description' => 'ads description',
+            'category' => 1
+        ]);
+
+        $response->assertOk();
+    }
 }

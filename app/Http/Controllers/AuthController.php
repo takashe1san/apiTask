@@ -14,6 +14,10 @@ class AuthController extends Controller
         $this->middleware('auth:api', ['except' => ['login', 'signup']]);
     }
 
+    /**
+     * make a new user
+     * 
+     */
     public function signup(Request $request){
         $rules = [
             'name'     => 'required',
@@ -44,8 +48,17 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Authentcate to An acount
+     * 
+     */
     public function login(Request $request)
     {
+        $user = User::where('email', $request->email)->first();
+        if($user->email_verified_at == null){
+            return apiResponse(0, 'Verify your email before login');
+        }
+
         if(!$token = auth()->attempt($request->only(['email', 'password']))){
             return response()->json([
                 'seccess' => false,

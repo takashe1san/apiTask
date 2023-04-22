@@ -48,11 +48,12 @@ Route::group([
     Route::post('/email/verify/resend',      [VerificationController::class, 'resendVerification']);
 
     // Advertisements
-    Route::post('ads/add',       [adsController::class, 'add'   ]);
-    Route::post('ads/edit',      [adsController::class, 'edit'  ]);
-    Route::get('ads/delete/{id}',[adsController::class, 'delete']);
     Route::get('ads',            [adsController::class, 'getAll']);
     Route::get('ads/{id}',       [adsController::class, 'get'   ]);
+    Route::get('ads/delete/{id}',[adsController::class, 'delete']);
+    Route::post('ads/add',       [adsController::class, 'add'   ]);
+    Route::post('ads/edit',      [adsController::class, 'edit'  ]);
+    // Route::post('ads/Image/edit',[ImagesController::class,'edit']);
 
     // Orders
     Route::post('order/edit', [OrdersController::class, 'edit'  ]);

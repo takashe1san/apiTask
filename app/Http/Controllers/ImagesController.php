@@ -33,4 +33,25 @@ class ImagesController extends Controller
             unlink($image->path);
         
     }
+
+    public static function edit($adsID, $imageID, $newImage)
+    {
+        if(!$image = Image::find($imageID))
+        {
+            return ['success' => false, 'message' => 'Can\'t find the Image'];
+        }
+
+        if($image->advertisement != $adsID)
+        {
+            return ['success' => false, 'message' => 'Can\t edit this Image'];
+        }
+
+        $newPath = $newImage->store('storage');
+        unlink($image->path);
+        $image->path = $newPath;
+        if($image->save())
+        {
+            return ['success' => true, 'newPath' => $newPath];
+        }
+    }
 }
